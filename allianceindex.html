@@ -1,0 +1,549 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Alliance — Turn different degrees into one team</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0B0E13;
+    --near-black: #11151D;
+    --gold: #B08D3F;
+    --gold-light: #D8BE7C;
+    --grey: #8A8F98;
+    --grey-light: #C7CAD1;
+    --line: #232833;
+    --paper: #FFFFFF;
+    --ink: #14171C;
+    --ink-soft: #4A4F58;
+    --wash: #F4F4F2;
+    --teal-dark: #0B5A54;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-weight: 300;
+    color: var(--ink);
+    background: var(--paper);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  h1, h2, h3, .brand, .stat .num, .founder-name {
+    font-family: 'Libre Caslon Text', Georgia, serif;
+    font-weight: 400;
+  }
+  a { color: inherit; }
+  .container { max-width: 1040px; margin: 0 auto; padding: 0 32px; }
+
+  /* Nav */
+  nav {
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(11,14,19,0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-inner {
+    max-width: 1040px; margin: 0 auto; padding: 20px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .brand { color: #fff; font-size: 20px; letter-spacing: 0.02em; }
+  .nav-links { display: flex; gap: 36px; font-size: 12.5px; }
+  .nav-links a {
+    text-decoration: none; color: var(--grey-light); font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.09em;
+  }
+  .nav-links a:hover { color: var(--gold-light); }
+
+  /* Hero */
+  .hero-banner {
+    position: relative; min-height: 88vh; display: flex; flex-direction: column;
+    justify-content: center;
+    background:
+      linear-gradient(180deg, rgba(6,8,11,0.55) 0%, rgba(6,8,11,0.92) 100%),
+      url('https://picsum.photos/seed/alliance-hero/1800/1100') center/cover no-repeat;
+  }
+  .hero-eyebrow {
+    color: var(--gold-light); font-size: 12.5px; letter-spacing: 0.22em; text-transform: uppercase;
+    margin: 0 0 22px; font-weight: 500;
+  }
+  .hero-banner h1 {
+    color: #fff; font-size: 62px; line-height: 1.08; letter-spacing: -0.01em;
+    max-width: 760px; margin: 0 0 24px;
+  }
+  .hero-banner p.sub {
+    color: #C7CAD1; font-size: 18px; font-weight: 300; max-width: 540px; margin: 0 0 40px;
+  }
+  .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn {
+    display: inline-block; padding: 15px 30px; font-size: 12.5px; font-weight: 600;
+    text-decoration: none; cursor: pointer; letter-spacing: 0.08em; text-transform: uppercase;
+    border: 1px solid transparent; border-radius: 2px; transition: all 0.2s ease;
+  }
+  .btn-primary { background: var(--gold); color: #16130A; }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-secondary { background: transparent; color: #fff; border-color: rgba(255,255,255,0.35); }
+  .btn-secondary:hover { border-color: #fff; }
+  .btn-outline { background: transparent; color: var(--ink); border-color: var(--ink); }
+  .btn-outline:hover { background: var(--ink); color: #fff; }
+
+  .hero-scroll {
+    position: absolute; bottom: 34px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.55); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .hero-scroll .line { width: 1px; height: 34px; background: rgba(255,255,255,0.35); }
+
+  /* Diagram + stats — dark band */
+  .dark-band { background: var(--black); padding: 100px 0; }
+  .dark-band .kicker {
+    color: var(--gold-light); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    text-align: center; margin: 0 0 18px; font-weight: 500;
+  }
+  .dark-band h2 {
+    color: #fff; font-size: 32px; text-align: center; margin: 0 0 60px; letter-spacing: -0.01em;
+  }
+  .diagram-wrap { display: flex; justify-content: center; margin-bottom: 70px; }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .stat { padding: 34px 20px; text-align: center; border-left: 1px solid var(--line); }
+  .stat:first-child { border-left: none; }
+  .stat .num { font-size: 46px; color: var(--gold-light); line-height: 1; }
+  .stat .label {
+    font-size: 11.5px; color: var(--grey); margin-top: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+  }
+
+  /* Light sections */
+  section.light { padding: 90px 0; border-top: 1px solid var(--line); }
+  section.light .kicker {
+    color: var(--gold); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin: 0 0 14px; font-weight: 600;
+  }
+  section.light h2 { font-size: 30px; letter-spacing: -0.01em; margin: 0 0 12px; }
+  section.light p.lead { color: var(--ink-soft); margin: 0 0 44px; max-width: 560px; font-size: 16px; }
+
+  /* Form */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 22px; }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field.full { grid-column: 1 / -1; }
+  label { font-size: 11.5px; font-weight: 600; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.06em; }
+  label .opt { font-weight: 400; text-transform: none; letter-spacing: normal; color: var(--grey); }
+  input, select {
+    padding: 13px 14px; border-radius: 2px; border: 1px solid #D9D9D5;
+    font-size: 14.5px; font-family: inherit; background: var(--wash);
+    color: var(--ink);
+  }
+  input:focus, select:focus {
+    outline: none; border-color: var(--gold); background: var(--paper);
+    box-shadow: 0 0 0 3px rgba(176,141,63,0.14);
+  }
+  .chip-preview { display: flex; flex-wrap: wrap; gap: 6px; min-height: 18px; }
+  .chip {
+    font-size: 12px; padding: 5px 12px; border-radius: 2px;
+    background: #EAE5D8; color: #6B5525; font-weight: 600; letter-spacing: 0.02em;
+  }
+  .chip.need { background: #F0E3DB; color: #8A4B25; }
+  .error-msg { color: #A6431F; font-size: 13px; margin-top: 6px; display: none; }
+  .form-footer { margin-top: 26px; display: flex; align-items: center; gap: 18px; }
+  .success-msg { font-size: 13.5px; color: var(--teal-dark); display: none; font-weight: 500; }
+
+  /* Directory */
+  .directory-controls { display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; }
+  .directory-controls input[type="text"] { flex: 1; min-width: 200px; }
+  .directory-controls select { min-width: 150px; }
+  .directory-count { font-size: 12.5px; color: var(--grey); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .person-list { display: flex; flex-direction: column; gap: 14px; }
+  .person-row {
+    display: flex; gap: 18px; padding: 22px; border: 1px solid #E4E4E0;
+    background: var(--paper); transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .person-row:hover { box-shadow: 0 12px 28px rgba(11,14,19,0.08); border-color: #D9D9D5; }
+  .avatar {
+    flex-shrink: 0; width: 50px; height: 50px; border-radius: 50%;
+    background: var(--wash); overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; display: block; }
+  .person-main { flex: 1; min-width: 0; }
+  .person-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .person-name { font-family: 'Libre Caslon Text', serif; font-weight: 400; font-size: 17px; }
+  .person-meta { font-size: 12px; color: var(--grey); text-transform: uppercase; letter-spacing: 0.05em; }
+  .person-skills { margin: 10px 0 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .person-need { font-size: 13.5px; color: var(--ink-soft); margin-top: 8px; }
+  .person-need b { color: var(--ink); font-weight: 600; }
+  .contact-link { font-size: 12.5px; color: var(--gold); font-weight: 600; text-decoration: none; margin-top: 10px; display: inline-block; text-transform: uppercase; letter-spacing: 0.05em; }
+  .contact-link:hover { text-decoration: underline; }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--grey); }
+  .empty-state .big { font-size: 16px; color: var(--ink-soft); font-weight: 600; margin-bottom: 6px; }
+
+  /* Founder — dark band */
+  .founder-band { background: var(--near-black); padding: 100px 0; }
+  .founder-band .kicker {
+    color: var(--gold-light); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+    margin: 0 0 40px; font-weight: 500; text-align: center;
+  }
+  .founder-card {
+    display: flex; gap: 40px; align-items: center; max-width: 720px; margin: 0 auto;
+  }
+  .founder-avatar {
+    flex-shrink: 0; width: 130px; height: 130px; border-radius: 50%; overflow: hidden;
+    border: 1px solid rgba(216,190,124,0.4);
+  }
+  .founder-avatar img { width: 100%; height: 100%; display: block; }
+  .founder-name { color: #fff; font-size: 24px; margin-bottom: 6px; }
+  .founder-role { font-size: 12px; color: var(--gold-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 16px; }
+  .founder-blurb { font-size: 15px; color: #B7BAC2; margin: 0; line-height: 1.7; }
+
+  footer {
+    background: var(--black); border-top: 1px solid var(--line); padding: 32px 0;
+    font-size: 12px; color: var(--grey); text-align: center; letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 720px) {
+    .hero-banner h1 { font-size: 38px; }
+    .dark-band, section.light, .founder-band { padding: 60px 0; }
+    .stats { grid-template-columns: 1fr; }
+    .stat { border-left: none; border-top: 1px solid var(--line); }
+    .stat:first-child { border-top: none; }
+    .form-grid { grid-template-columns: 1fr; }
+    .founder-card { flex-direction: column; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="brand">Alliance</div>
+    <div class="nav-links">
+      <a href="#join">List yourself</a>
+      <a href="#directory">Directory</a>
+      <a href="#founder">Founder</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero-banner">
+  <div class="container">
+    <div class="hero-eyebrow">Avantika University · Launchpad Demo Day</div>
+    <h1>Turn different degrees into one team.</h1>
+    <p class="sub">Design, engineering, management, law — Alliance is where students from any branch find the teammate they're missing, for any competition or project.</p>
+    <div class="hero-ctas">
+      <a href="#join" class="btn btn-primary">List your skills</a>
+      <a href="#directory" class="btn btn-secondary">Browse the directory</a>
+    </div>
+  </div>
+  <div class="hero-scroll"><span>Scroll</span><span class="line"></span></div>
+</div>
+
+<div class="dark-band">
+  <div class="container">
+    <div class="kicker">How it connects</div>
+    <h2>One team, four disciplines.</h2>
+
+    <div class="diagram-wrap">
+      <svg width="640" height="180" viewBox="0 0 640 180" role="img" aria-label="Diagram showing Design, Engineering, Management, and Law connecting into one team">
+        <g stroke="#3A3F49" stroke-width="1">
+          <line x1="100" y1="42" x2="320" y2="90"/>
+          <line x1="100" y1="140" x2="320" y2="90"/>
+          <line x1="540" y1="42" x2="320" y2="90"/>
+          <line x1="540" y1="140" x2="320" y2="90"/>
+        </g>
+        <g font-family="Inter, sans-serif" font-size="12.5" font-weight="600" letter-spacing="0.02em">
+          <circle cx="100" cy="42" r="36" fill="none" stroke="#B08D3F" stroke-width="1"/>
+          <text x="100" y="47" text-anchor="middle" fill="#D8BE7C">DESIGN</text>
+
+          <circle cx="100" cy="140" r="36" fill="none" stroke="#B08D3F" stroke-width="1"/>
+          <text x="100" y="145" text-anchor="middle" fill="#D8BE7C">ENG.</text>
+
+          <circle cx="540" cy="42" r="36" fill="none" stroke="#B08D3F" stroke-width="1"/>
+          <text x="540" y="47" text-anchor="middle" fill="#D8BE7C">MGMT.</text>
+
+          <circle cx="540" cy="140" r="36" fill="none" stroke="#B08D3F" stroke-width="1"/>
+          <text x="540" y="145" text-anchor="middle" fill="#D8BE7C">LAW</text>
+
+          <circle cx="320" cy="90" r="46" fill="#B08D3F"/>
+          <text x="320" y="95" text-anchor="middle" fill="#16130A">TEAM</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num" id="stat-people">4</div><div class="label">Students listed</div></div>
+      <div class="stat"><div class="num" id="stat-skills">11</div><div class="label">Distinct skills offered</div></div>
+      <div class="stat"><div class="num" id="stat-branches">4</div><div class="label">Branches represented</div></div>
+    </div>
+  </div>
+</div>
+
+<section class="light" id="join">
+  <div class="container">
+    <div class="kicker">Get started</div>
+    <h2>List yourself</h2>
+    <p class="lead">Takes under a minute. Add what you can offer and what you're missing — anyone browsing the directory can find and reach you directly.</p>
+
+    <div class="form-grid">
+      <div class="field">
+        <label for="f-name">Name</label>
+        <input id="f-name" placeholder="e.g. Priya Sharma" />
+      </div>
+      <div class="field">
+        <label for="f-branch">Branch or program</label>
+        <input id="f-branch" placeholder="e.g. B.Des, BTech CSE, MBA" />
+      </div>
+      <div class="field">
+        <label for="f-year">Year</label>
+        <select id="f-year">
+          <option value="">Select year</option>
+          <option>1st year</option>
+          <option>2nd year</option>
+          <option>3rd year</option>
+          <option>4th year</option>
+          <option>PG</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="f-contact">Contact <span class="opt">(email, phone, or Instagram handle)</span></label>
+        <input id="f-contact" placeholder="e.g. priya@college.edu or @priya.designs" />
+      </div>
+      <div class="field full">
+        <label for="f-skills">Skills you offer <span class="opt">(comma separated)</span></label>
+        <input id="f-skills" placeholder="e.g. UI design, Figma, branding" oninput="previewChips('f-skills','skills-preview','chip')" />
+        <div class="chip-preview" id="skills-preview"></div>
+      </div>
+      <div class="field full">
+        <label for="f-need">What you're looking for in a teammate</label>
+        <input id="f-need" placeholder="e.g. React developer" oninput="previewChips('f-need','need-preview','chip need')" />
+        <div class="chip-preview" id="need-preview"></div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="f-error">Add your name, at least one skill, and what you're looking for.</div>
+
+    <div class="form-footer">
+      <button class="btn btn-outline" id="submit-btn">Add yourself to Alliance</button>
+      <span class="success-msg" id="f-success">Added — scroll down to see yourself in the directory.</span>
+    </div>
+  </div>
+</section>
+
+<section class="light" id="directory">
+  <div class="container">
+    <div class="kicker">Browse</div>
+    <h2>Directory</h2>
+    <p class="lead">Search by skill, or filter by branch and year to find your match.</p>
+
+    <div class="directory-controls">
+      <input type="text" id="search-input" placeholder="Search a skill, e.g. coding, design, pitching" oninput="renderDirectory()" />
+      <select id="filter-branch" onchange="renderDirectory()">
+        <option value="">All branches</option>
+      </select>
+      <select id="filter-year" onchange="renderDirectory()">
+        <option value="">All years</option>
+        <option>1st year</option>
+        <option>2nd year</option>
+        <option>3rd year</option>
+        <option>4th year</option>
+        <option>PG</option>
+      </select>
+    </div>
+
+    <div class="directory-count" id="directory-count"></div>
+    <div class="person-list" id="person-list"></div>
+  </div>
+</section>
+
+<div class="founder-band" id="founder">
+  <div class="container">
+    <div class="kicker">Leadership</div>
+    <div class="founder-card">
+      <div class="founder-avatar">
+        <img src="https://api.dicebear.com/7.x/notionists/svg?seed=kartikey-raj-p-singh-rathore&backgroundColor=b08d3f" alt="" loading="lazy">
+      </div>
+      <div>
+        <div class="founder-name">Kartikey Raj P Singh Rathore</div>
+        <div class="founder-role">Founder, Alliance</div>
+        <p class="founder-blurb">Built solo for Launchpad — Product Demo Day at Avantika University, out of a firsthand struggle to find multidisciplinary teammates for this very event.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Alliance — Launchpad Demo Day, Avantika University
+</footer>
+
+<script>
+  let people = [
+    { name: "Aarav Mehta", branch: "BTech CSE (AI & ML)", year: "3rd year", skills: ["React", "Node.js", "Firebase"], need: "UI/UX designer", contact: "aarav.m@avantika.edu" },
+    { name: "Simran Kaur", branch: "B.Des Product Design", year: "2nd year", skills: ["Figma", "Prototyping", "Branding"], need: "coder", contact: "@simran.designs" },
+    { name: "Rohan Vyas", branch: "MBA", year: "PG", skills: ["Pitching", "Market research", "Financial modeling"], need: "developer for MVP", contact: "rohan.vyas@avantika.edu" },
+    { name: "Ishita Rao", branch: "BA LLB (H)", year: "3rd year", skills: ["Legal drafting", "Public speaking"], need: "designer", contact: "@ishita.rao" }
+  ];
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function avatarUrl(name) {
+    const seed = encodeURIComponent(name.trim().toLowerCase());
+    return `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}&backgroundColor=f4f4f2,eae5d8,f0e3db`;
+  }
+
+  function previewChips(inputId, previewId, chipClass) {
+    const raw = document.getElementById(inputId).value.trim();
+    const preview = document.getElementById(previewId);
+    preview.innerHTML = '';
+    if (!raw) return;
+    raw.split(',').map(s => s.trim()).filter(Boolean).forEach(s => {
+      const span = document.createElement('span');
+      span.className = chipClass;
+      span.textContent = s;
+      preview.appendChild(span);
+    });
+  }
+
+  function updateStats() {
+    const skillSet = new Set();
+    const branchSet = new Set();
+    people.forEach(p => {
+      p.skills.forEach(s => skillSet.add(s.toLowerCase()));
+      if (p.branch) branchSet.add(p.branch);
+    });
+    document.getElementById('stat-people').textContent = people.length;
+    document.getElementById('stat-skills').textContent = skillSet.size;
+    document.getElementById('stat-branches').textContent = branchSet.size;
+  }
+
+  function updateBranchFilter() {
+    const select = document.getElementById('filter-branch');
+    const current = select.value;
+    const branches = Array.from(new Set(people.map(p => p.branch).filter(Boolean))).sort();
+    select.innerHTML = '<option value="">All branches</option>' +
+      branches.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+    if (branches.includes(current)) select.value = current;
+  }
+
+  function contactHref(contact) {
+    if (contact.includes('@') && contact.includes('.') && !contact.startsWith('@')) {
+      return 'mailto:' + contact;
+    }
+    return null;
+  }
+
+  function renderDirectory() {
+    const query = document.getElementById('search-input').value.trim().toLowerCase();
+    const branchFilter = document.getElementById('filter-branch').value;
+    const yearFilter = document.getElementById('filter-year').value;
+    const listEl = document.getElementById('person-list');
+    const countEl = document.getElementById('directory-count');
+
+    let list = people.map(p => ({ ...p, score: 0 }));
+
+    if (query) {
+      list = list.map(p => {
+        const skillScore = p.skills.filter(s => s.toLowerCase().includes(query) || query.includes(s.toLowerCase())).length;
+        const needScore = p.need.toLowerCase().includes(query) ? 1 : 0;
+        return { ...p, score: skillScore * 2 + needScore };
+      }).filter(p => p.score > 0);
+    }
+
+    if (branchFilter) list = list.filter(p => p.branch === branchFilter);
+    if (yearFilter) list = list.filter(p => p.year === yearFilter);
+
+    list.sort((a, b) => b.score - a.score);
+
+    countEl.textContent = list.length === people.length && !query && !branchFilter && !yearFilter
+      ? `${list.length} student${list.length === 1 ? '' : 's'} in the directory`
+      : `${list.length} match${list.length === 1 ? '' : 'es'} found`;
+
+    listEl.innerHTML = '';
+
+    if (list.length === 0) {
+      listEl.innerHTML = `<div class="empty-state"><div class="big">No matches yet</div>Try a broader skill, or clear a filter.</div>`;
+      return;
+    }
+
+    list.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'person-row';
+      const href = contactHref(p.contact);
+      const contactHtml = href
+        ? `<a class="contact-link" href="${href}">Contact ${escapeHtml(p.name.split(' ')[0])} \u2192</a>`
+        : `<span class="contact-link">${escapeHtml(p.contact)}</span>`;
+
+      row.innerHTML = `
+        <div class="avatar"><img src="${avatarUrl(p.name)}" alt="" loading="lazy"></div>
+        <div class="person-main">
+          <div class="person-top">
+            <div class="person-name">${escapeHtml(p.name)}</div>
+            <div class="person-meta">${escapeHtml(p.branch || 'Branch not specified')} \u00b7 ${escapeHtml(p.year || 'Year not specified')}</div>
+          </div>
+          <div class="person-skills">${p.skills.map(s => `<span class="chip">${escapeHtml(s)}</span>`).join('')}</div>
+          <div class="person-need">Looking for <b>${escapeHtml(p.need)}</b></div>
+          ${contactHtml}
+        </div>
+      `;
+      listEl.appendChild(row);
+    });
+  }
+
+  document.getElementById('submit-btn').addEventListener('click', () => {
+    const name = document.getElementById('f-name').value.trim();
+    const branch = document.getElementById('f-branch').value.trim();
+    const year = document.getElementById('f-year').value;
+    const contact = document.getElementById('f-contact').value.trim();
+    const skillsRaw = document.getElementById('f-skills').value.trim();
+    const need = document.getElementById('f-need').value.trim();
+    const errorEl = document.getElementById('f-error');
+    const successEl = document.getElementById('f-success');
+
+    if (!name || !skillsRaw || !need) {
+      errorEl.style.display = 'block';
+      successEl.style.display = 'none';
+      return;
+    }
+    errorEl.style.display = 'none';
+
+    const skills = skillsRaw.split(',').map(s => s.trim()).filter(Boolean);
+    people.push({
+      name, branch: branch || '', year: year || '',
+      skills, need, contact: contact || 'No contact info provided'
+    });
+
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-branch').value = '';
+    document.getElementById('f-year').value = '';
+    document.getElementById('f-contact').value = '';
+    document.getElementById('f-skills').value = '';
+    document.getElementById('f-need').value = '';
+    document.getElementById('skills-preview').innerHTML = '';
+    document.getElementById('need-preview').innerHTML = '';
+
+    successEl.style.display = 'inline';
+    updateStats();
+    updateBranchFilter();
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-branch').value = '';
+    document.getElementById('filter-year').value = '';
+    renderDirectory();
+  });
+
+  updateStats();
+  updateBranchFilter();
+  renderDirectory();
+</script>
+
+</body>
+</html>
