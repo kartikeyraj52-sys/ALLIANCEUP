@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root {
     --ink: #1c2541;
@@ -542,18 +544,36 @@
 
   document.getElementById('submit-btn').addEventListener('click', validateAndAdd);
 
-  // --- Persistence: uses Claude's built-in storage when this runs as an
-  // artifact (so entries persist across refreshes / other visitors of the
-  // same link); falls back to this browser's localStorage when hosted as a
-  // standalone site (e.g. GitHub Pages) where window.storage doesn't exist.
-  const STORAGE_KEY = 'alliance-directory-people';
-  const hasCloudStorage = typeof window.storage !== 'undefined';
+  // --- Persistence: Firebase Firestore, shared across every visitor.
+  // 1. Paste your firebaseConfig object below (from the Firebase console).
+  // 2. That's it — the directory will read/write from your Firestore project.
+  const firebaseConfig = {
+    apiKey: "AIzaSyDBdEGlJZsc26Kh2Xl_Orx2tFIEBTNpfIs",
+    authDomain: "alliance-directory.firebaseapp.com",
+    projectId: "alliance-directory",
+    storageBucket: "alliance-directory.firebasestorage.app",
+    messagingSenderId: "224575905503",
+    appId: "1:224575905503:web:adc50280ebbea0c7e0d36a"
+  };
+
+  const firebaseReady = !!firebaseConfig.projectId;
+  let directoryDocRef = null;
+
+  if (firebaseReady) {
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    directoryDocRef = db.collection('alliance').doc('directory');
+  } else {
+    console.warn('Firebase config not set yet — falling back to this browser only (localStorage). Paste your firebaseConfig to enable a shared directory.');
+  }
+
+  const STORAGE_KEY = 'alliance-directory-people'; // used only for the localStorage fallback
 
   async function savePeople() {
     try {
       const json = JSON.stringify(people);
-      if (hasCloudStorage) {
-        await window.storage.set(STORAGE_KEY, json, true); // shared: visible to all visitors of this link
+      if (firebaseReady) {
+        await directoryDocRef.set({ peopleJson: json, updatedAt: Date.now() });
       } else if (window.localStorage) {
         localStorage.setItem(STORAGE_KEY, json);
       }
@@ -564,10 +584,10 @@
 
   async function loadPeople() {
     try {
-      if (hasCloudStorage) {
-        const result = await window.storage.get(STORAGE_KEY, true);
-        if (result && result.value) {
-          const parsed = JSON.parse(result.value);
+      if (firebaseReady) {
+        const snap = await directoryDocRef.get();
+        if (snap.exists && snap.data().peopleJson) {
+          const parsed = JSON.parse(snap.data().peopleJson);
           if (Array.isArray(parsed) && parsed.length) { people = parsed; return; }
         }
       } else if (window.localStorage) {
@@ -589,6 +609,23 @@
     updateStats();
     updateBranchFilter();
     renderDirectory();
+
+    // Live sync: if someone else adds a profile, everyone's page updates
+    // automatically without needing to refresh.
+    if (firebaseReady) {
+      directoryDocRef.onSnapshot((snap) => {
+        if (!snap.exists || !snap.data().peopleJson) return;
+        try {
+          const parsed = JSON.parse(snap.data().peopleJson);
+          if (Array.isArray(parsed)) {
+            people = parsed;
+            updateStats();
+            updateBranchFilter();
+            renderDirectory();
+          }
+        } catch (e) { /* ignore malformed snapshot */ }
+      });
+    }
   })();
 </script>
 
