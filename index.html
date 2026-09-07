@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -496,6 +495,7 @@
     updateStats();
     updateBranchFilter();
     renderDirectory();
+    savePeople();
 
     document.getElementById('f-name').value = '';
     document.getElementById('f-branch').value = '';
@@ -542,9 +542,54 @@
 
   document.getElementById('submit-btn').addEventListener('click', validateAndAdd);
 
-  updateStats();
-  updateBranchFilter();
-  renderDirectory();
+  // --- Persistence: uses Claude's built-in storage when this runs as an
+  // artifact (so entries persist across refreshes / other visitors of the
+  // same link); falls back to this browser's localStorage when hosted as a
+  // standalone site (e.g. GitHub Pages) where window.storage doesn't exist.
+  const STORAGE_KEY = 'alliance-directory-people';
+  const hasCloudStorage = typeof window.storage !== 'undefined';
+
+  async function savePeople() {
+    try {
+      const json = JSON.stringify(people);
+      if (hasCloudStorage) {
+        await window.storage.set(STORAGE_KEY, json, true); // shared: visible to all visitors of this link
+      } else if (window.localStorage) {
+        localStorage.setItem(STORAGE_KEY, json);
+      }
+    } catch (e) {
+      console.warn('Could not save directory:', e);
+    }
+  }
+
+  async function loadPeople() {
+    try {
+      if (hasCloudStorage) {
+        const result = await window.storage.get(STORAGE_KEY, true);
+        if (result && result.value) {
+          const parsed = JSON.parse(result.value);
+          if (Array.isArray(parsed) && parsed.length) { people = parsed; return; }
+        }
+      } else if (window.localStorage) {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length) { people = parsed; return; }
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load saved directory, using defaults:', e);
+    }
+    // Nothing saved yet — persist the default list as the starting point.
+    await savePeople();
+  }
+
+  (async function init() {
+    await loadPeople();
+    updateStats();
+    updateBranchFilter();
+    renderDirectory();
+  })();
 </script>
 
 </body>
