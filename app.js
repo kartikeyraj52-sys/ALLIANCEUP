@@ -12,19 +12,65 @@ const firebaseConfig = {
   appId: "YOUR_APP_ID"
 };
 
+// ... (Your Firebase Config is up here) ...
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 3. YOUR ORIGINAL HARDCODED DATA
+// ---------------------------------------------------------
+// 3. YOUR ORIGINAL HARDCODED DATA (REPLACE THIS SECTION)
+// ---------------------------------------------------------
 let people = [
-  { name: "Aarav Mehta", branch: "BTech CSE (AI & ML)", year: "3rd year", skills: ["React", "Node.js", "Firebase"], need: "UI/UX designer", contact: "aarav.m@avantika.edu" },
-  { name: "Simran Kaur", branch: "B.Des Product Design", year: "2nd year", skills: ["Figma", "Prototyping", "Branding"], need: "coder", contact: "@simran.designs" },
-  { name: "Rohan Vyas", branch: "MBA", year: "PG", skills: ["Pitching", "Market research", "Financial modeling"], need: "developer for MVP", contact: "rohan.vyas@avantika.edu" },
-  { name: "Ishita Rao", branch: "BA LLB (H)", year: "3rd year", skills: ["Legal drafting", "Public speaking"], need: "designer", contact: "@ishita.rao" }
+  { 
+    name: "Aarav Mehta", 
+    branch: "BTech CSE (AI & ML)", 
+    year: "3rd year", 
+    skills: ["React", "Node.js", "Firebase"], 
+    need: "UI/UX designer", 
+    contact: "aarav.m@avantika.edu", 
+    avatar: "images/aarav.jpg" // <-- Replace with your actual image path
+  },
+  { 
+    name: "Simran Kaur", 
+    branch: "B.Des Product Design", 
+    year: "2nd year", 
+    skills: ["Figma", "Prototyping", "Branding"], 
+    need: "coder", 
+    contact: "@simran.designs", 
+    avatar: "images/simran.jpg" // <-- Replace with your actual image path
+  },
+  { 
+    name: "Rohan Vyas", 
+    branch: "MBA", 
+    year: "PG", 
+    skills: ["Pitching", "Market research", "Financial modeling"], 
+    need: "developer for MVP", 
+    contact: "rohan.vyas@avantika.edu", 
+    avatar: "images/rohan.jpg" // <-- Replace with your actual image path
+  },
+  { 
+    name: "Ishita Rao", 
+    branch: "BA LLB (H)", 
+    year: "3rd year", 
+    skills: ["Legal drafting", "Public speaking"], 
+    need: "designer", 
+    contact: "@ishita.rao", 
+    avatar: "images/ishita.jpg" // <-- Replace with your actual image path
+  },
+  { 
+    name: "Pushpanjali Rathore", 
+    branch: "B.B.A", 
+    year: "1st year", 
+    skills: ["Project Management", "Public Anchoring"], 
+    need: "Legal Advisor", 
+    contact: "@Pushpanjali", 
+    avatar: "images/pushpanjali.jpg" // <-- Replace with your actual image path
+  }
 ];
+// ---------------------------------------------------------
 
 // 4. UI FUNCTIONS
 function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+// ... (The rest of your app.js code continues here) ...
 function avatarUrl(name) { return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim().toLowerCase())}&backgroundColor=e2e8f0&textColor=1c2541`; }
 
 function previewChips(inputId, previewId) {
