@@ -381,188 +381,216 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
-  // 2. HARDCODED DATA
-  let people = [
-    { name: "Aarav Mehta", branch: "BTech CSE (AI & ML)", year: "3rd year", skills: ["React", "Node.js", "Firebase"], need: "UI/UX designer", contact: "aarav.m@avantika.edu", pin: "0000" },
-    { name: "Simran Kaur", branch: "B.Des Product Design", year: "2nd year", skills: ["Figma", "Prototyping", "Branding"], need: "coder", contact: "@simran.designs", pin: "0000" },
-    { name: "Rohan Vyas", branch: "MBA", year: "PG", skills: ["Pitching", "Market research", "Financial modeling"], need: "developer for MVP", contact: "rohan.vyas@avantika.edu", pin: "0000" },
-    { name: "Ishita Rao", branch: "BA LLB (H)", year: "3rd year", skills: ["Legal drafting", "Public speaking"], need: "designer", contact: "@ishita.rao", pin: "0000" },
-    { name: "Pushpanjali Rathore", branch: "B.B.A", year: "1st year", skills: ["Project Management", "Public Anchoring"], need: "Legal Advisor", contact: "@Pushpanjali", pin: "0000" }
-  ];
+    // 2. HARDCODED DATA (Restored Avatars & Added IDs for the Remove button)
+  let people = [
+    { id: "original-1", name: "Aarav Mehta", branch: "BTech CSE (AI & ML)", year: "3rd year", skills: ["React", "Node.js", "Firebase"], need: "UI/UX designer", contact: "aarav.m@avantika.edu", pin: "0000", avatar: "images/aarav.jpg" },
+    { id: "original-2", name: "Simran Kaur", branch: "B.Des Product Design", year: "2nd year", skills: ["Figma", "Prototyping", "Branding"], need: "coder", contact: "@simran.designs", pin: "0000", avatar: "images/simran.jpg" },
+    { id: "original-3", name: "Rohan Vyas", branch: "MBA", year: "PG", skills: ["Pitching", "Market research", "Financial modeling"], need: "developer for MVP", contact: "rohan.vyas@avantika.edu", pin: "0000", avatar: "images/rohan.jpg" },
+    { id: "original-4", name: "Ishita Rao", branch: "BA LLB (H)", year: "3rd year", skills: ["Legal drafting", "Public speaking"], need: "designer", contact: "@ishita.rao", pin: "0000", avatar: "images/ishita.jpg" },
+    { id: "original-5", name: "Pushpanjali Rathore", branch: "B.B.A", year: "1st year", skills: ["Project Management", "Public Anchoring"], need: "Legal Advisor", contact: "@Pushpanjali", pin: "0000", avatar: "images/pushpanjali.jpg" }
+  ];
 
-  // 3. UI HELPER FUNCTIONS
-  function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
-  function avatarUrl(name) { return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim().toLowerCase())}&backgroundColor=e2e8f0&textColor=1c2541`; }
+  // 3. UI HELPER FUNCTIONS
+  function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; }
+  function avatarUrl(name) { return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name.trim().toLowerCase())}&backgroundColor=e2e8f0&textColor=1c2541`; }
 
-  window.previewChips = function(inputId, previewId) {
-    const raw = document.getElementById(inputId).value.trim();
-    const preview = document.getElementById(previewId);
-    preview.innerHTML = '';
-    if (!raw) return;
-    raw.split(',').map(s => s.trim()).filter(Boolean).forEach(s => {
-      const span = document.createElement('span'); span.className = 'chip'; span.textContent = s; preview.appendChild(span);
-    });
-  };
+  window.previewPhoto = function() {
+    const fileInput = document.getElementById('f-photo');
+    const wrap = document.getElementById('photo-preview');
+    const img = document.getElementById('photo-preview-img');
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) { wrap.style.display = 'none'; return; }
+    const reader = new FileReader();
+    reader.onload = (e) => { img.src = e.target.result; wrap.style.display = 'flex'; };
+    reader.readAsDataURL(file);
+  };
 
-  function updateStats() {
-    const skillSet = new Set(); const branchSet = new Set();
-    people.forEach(p => { p.skills.forEach(s => skillSet.add(s.toLowerCase())); if (p.branch) branchSet.add(p.branch); });
-    document.getElementById('stat-people').textContent = people.length;
-    document.getElementById('stat-skills').textContent = skillSet.size;
-    document.getElementById('stat-branches').textContent = branchSet.size;
-  }
+  window.previewChips = function(inputId, previewId) {
+    const raw = document.getElementById(inputId).value.trim();
+    const preview = document.getElementById(previewId);
+    preview.innerHTML = '';
+    if (!raw) return;
+    raw.split(',').map(s => s.trim()).filter(Boolean).forEach(s => {
+      const span = document.createElement('span'); span.className = 'chip'; span.textContent = s; preview.appendChild(span);
+    });
+  };
 
-  window.updateBranchFilter = function() {
-    const select = document.getElementById('filter-branch');
-    const current = select.value;
-    const branches = Array.from(new Set(people.map(p => p.branch).filter(Boolean))).sort();
-    select.innerHTML = '<option value="">All branches</option>' + branches.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
-    if (branches.includes(current)) select.value = current;
-  };
+  function updateStats() {
+    const skillSet = new Set(); const branchSet = new Set();
+    people.forEach(p => { p.skills.forEach(s => skillSet.add(s.toLowerCase())); if (p.branch) branchSet.add(p.branch); });
+    document.getElementById('stat-people').textContent = people.length;
+    document.getElementById('stat-skills').textContent = skillSet.size;
+    document.getElementById('stat-branches').textContent = branchSet.size;
+  }
 
-  function contactHref(contact) { return (contact.includes('@') && contact.includes('.') && !contact.startsWith('@')) ? 'mailto:' + contact : null; }
+  window.updateBranchFilter = function() {
+    const select = document.getElementById('filter-branch');
+    const current = select.value;
+    const branches = Array.from(new Set(people.map(p => p.branch).filter(Boolean))).sort();
+    select.innerHTML = '<option value="">All branches</option>' + branches.map(b => `<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join('');
+    if (branches.includes(current)) select.value = current;
+  };
 
-  // 4. MAIN DIRECTORY RENDER FUNCTION
-  window.renderDirectory = function() {
-    const query = document.getElementById('search-input').value.trim().toLowerCase();
-    const branchFilter = document.getElementById('filter-branch').value;
-    const yearFilter = document.getElementById('filter-year').value;
-    const listEl = document.getElementById('person-list');
-    
-    let list = people.map(p => ({ ...p, score: 0 }));
-    if (query) {
-      list = list.map(p => {
-        const skillScore = p.skills.filter(s => s.toLowerCase().includes(query) || query.includes(s.toLowerCase())).length;
-        const needScore = p.need.toLowerCase().includes(query) ? 1 : 0;
-        return { ...p, score: skillScore * 2 + needScore };
-      }).filter(p => p.score > 0);
-    }
-    if (branchFilter) list = list.filter(p => p.branch === branchFilter);
-    if (yearFilter) list = list.filter(p => p.year === yearFilter);
-    list.sort((a, b) => b.score - a.score);
+  function contactHref(contact) { return (contact.includes('@') && contact.includes('.') && !contact.startsWith('@')) ? 'mailto:' + contact : null; }
 
-    document.getElementById('directory-count').textContent = (list.length === people.length && !query && !branchFilter && !yearFilter) ? `${list.length} students` : `${list.length} matches found`;
-    listEl.innerHTML = '';
-    if (list.length === 0) { listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--ink-soft);">No matches found.</div>`; return; }
+  // 4. MAIN DIRECTORY RENDER FUNCTION
+  window.renderDirectory = function() {
+    const query = document.getElementById('search-input').value.trim().toLowerCase();
+    const branchFilter = document.getElementById('filter-branch').value;
+    const yearFilter = document.getElementById('filter-year').value;
+    const listEl = document.getElementById('person-list');
+    
+    let list = people.map(p => ({ ...p, score: 0 }));
+    if (query) {
+      list = list.map(p => {
+        const skillScore = p.skills.filter(s => s.toLowerCase().includes(query) || query.includes(s.toLowerCase())).length;
+        const needScore = p.need.toLowerCase().includes(query) ? 1 : 0;
+        return { ...p, score: skillScore * 2 + needScore };
+      }).filter(p => p.score > 0);
+    }
+    if (branchFilter) list = list.filter(p => p.branch === branchFilter);
+    if (yearFilter) list = list.filter(p => p.year === yearFilter);
+    list.sort((a, b) => b.score - a.score);
 
-    list.forEach(p => {
-      const row = document.createElement('div'); row.className = 'person-row';
-      const href = contactHref(p.contact);
-      const contactHtml = href ? `<a class="contact-link" href="${href}">Contact ${escapeHtml(p.name.split(' ')[0])} →</a>` : `<span class="contact-link">${escapeHtml(p.contact)}</span>`;
-      
-      // Remove button logic added here
-      let removeBtnHtml = '';
-      if (p.id) { // Only show remove button if it came from Firebase
-        removeBtnHtml = `<button onclick="removeProfile('${p.id}', '${p.pin}')" class="remove-link">Remove</button>`;
-      }
+    document.getElementById('directory-count').textContent = (list.length === people.length && !query && !branchFilter && !yearFilter) ? `${list.length} students` : `${list.length} matches found`;
+    listEl.innerHTML = '';
+    if (list.length === 0) { listEl.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--ink-soft);">No matches found.</div>`; return; }
 
-      row.innerHTML = `
-        <div class="avatar"><img src="${p.avatar || avatarUrl(p.name)}" alt="" loading="lazy"></div>
-        <div class="person-main">
-          <div class="person-top"><div class="person-name">${escapeHtml(p.name)}</div><div class="person-meta">${escapeHtml(p.branch)} · ${escapeHtml(p.year)}</div></div>
-          <div class="person-skills">${p.skills.map(s => `<span class="chip">${escapeHtml(s)}</span>`).join('')}</div>
-          <div class="person-need">Looking for: <b>${escapeHtml(p.need)}</b></div>
-          <div class="person-bottom">
-            ${contactHtml}
-            ${removeBtnHtml}
-          </div>
-        </div>`;
-      listEl.appendChild(row);
-    });
-  };
+    list.forEach(p => {
+      const row = document.createElement('div'); row.className = 'person-row';
+      const href = contactHref(p.contact);
+      const contactHtml = href ? `<a class="contact-link" href="${href}">Contact ${escapeHtml(p.name.split(' ')[0])} →</a>` : `<span class="contact-link">${escapeHtml(p.contact)}</span>`;
+      
+      let removeBtnHtml = '';
+      if (p.id) { 
+        removeBtnHtml = `<button onclick="removeProfile('${p.id}', '${p.pin}')" class="remove-link">Remove</button>`;
+      }
 
-  // 5. FETCH FROM FIREBASE
-  async function loadDirectoryData() {
-    try {
-      const querySnapshot = await db.collection("students").get();
-      // Keep hardcoded data, just add Firebase data to it
-      let fetchedPeople = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        fetchedPeople.push({
-          id: doc.id,
-          name: data.name, branch: data.branch || 'Undeclared', year: data.year || 'N/A',
-          contact: data.contact || 'Contact via directory', skills: data.skills || [], need: data.need || 'N/A', pin: data.pin || ''
-        });
-      });
-      // Merge arrays
-      people = [...people.filter(p => !p.id), ...fetchedPeople];
-      
-      updateStats(); updateBranchFilter(); renderDirectory();
-    } catch (error) { console.error("Error fetching: ", error); }
-  }
+      row.innerHTML = `
+        <div class="avatar"><img src="${p.avatar || avatarUrl(p.name)}" alt="" loading="lazy"></div>
+        <div class="person-main">
+          <div class="person-top"><div class="person-name">${escapeHtml(p.name)}</div><div class="person-meta">${escapeHtml(p.branch)} · ${escapeHtml(p.year)}</div></div>
+          <div class="person-skills">${p.skills.map(s => `<span class="chip">${escapeHtml(s)}</span>`).join('')}</div>
+          <div class="person-need">Looking for: <b>${escapeHtml(p.need)}</b></div>
+          <div class="person-bottom" style="display:flex; justify-content:space-between; align-items:center; margin-top: 12px;">
+            ${contactHtml}
+            ${removeBtnHtml}
+          </div>
+        </div>`;
+      listEl.appendChild(row);
+    });
+  };
 
-  // 6. SAVE TO FIREBASE
-  document.getElementById('submit-btn').addEventListener('click', async () => {
-    const name = document.getElementById('f-name').value.trim();
-    const branch = document.getElementById('f-branch').value.trim();
-    const year = document.getElementById('f-year').value;
-    const contact = document.getElementById('f-contact').value.trim();
-    const skillsRaw = document.getElementById('f-skills').value.trim();
-    const need = document.getElementById('f-need').value.trim();
-    // Prompt for PIN during creation
-    const pin = prompt("Create a 4-digit PIN to allow removing this profile later:");
-    
-    const errorEl = document.getElementById('f-error');
-    const successEl = document.getElementById('f-success');
+  // 5. FETCH FROM FIREBASE
+  async function loadDirectoryData() {
+    try {
+      const querySnapshot = await db.collection("students").get();
+      let fetchedPeople = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        fetchedPeople.push({
+          id: doc.id,
+          name: data.name, branch: data.branch || 'Undeclared', year: data.year || 'N/A',
+          contact: data.contact || 'Contact via directory', skills: data.skills || [], need: data.need || 'N/A', pin: data.pin || '', avatar: data.avatar || null
+        });
+      });
+      people = [...people.filter(p => !p.id || p.id.startsWith("original-")), ...fetchedPeople];
+      
+      updateStats(); updateBranchFilter(); renderDirectory();
+    } catch (error) { console.error("Error fetching: ", error); }
+  }
 
-    if (!name || !skillsRaw || !need || !pin) {
-      errorEl.textContent = "Name, skills, need, and PIN are required.";
-      errorEl.style.display = 'block'; successEl.style.display = 'none'; return;
-    }
-    errorEl.style.display = 'none';
-    const skills = skillsRaw.split(',').map(s => s.trim()).filter(Boolean);
+  // 6. SAVE TO FIREBASE (Restored Image Upload)
+  document.getElementById('submit-btn').addEventListener('click', async () => {
+    const name = document.getElementById('f-name').value.trim();
+    const branch = document.getElementById('f-branch').value.trim();
+    const year = document.getElementById('f-year').value;
+    const contact = document.getElementById('f-contact').value.trim();
+    const skillsRaw = document.getElementById('f-skills').value.trim();
+    const need = document.getElementById('f-need').value.trim();
+    const photoFile = document.getElementById('f-photo').files[0];
+    const pin = prompt("Create a 4-digit PIN to allow removing this profile later:");
+    
+    const errorEl = document.getElementById('f-error');
+    const successEl = document.getElementById('f-success');
 
-    try {
-      const docRef = await db.collection("students").add({ name, branch, year, contact, skills, need, pin, timestamp: new Date() });
-      people.push({ id: docRef.id, name, branch: branch || 'Undeclared', year: year || 'N/A', contact: contact || 'Contact via directory', skills, need, pin });
-      
-      successEl.style.display = 'block';
-      updateStats(); updateBranchFilter(); renderDirectory();
-      
-      document.getElementById('f-name').value = ''; document.getElementById('f-branch').value = '';
-      document.getElementById('f-year').value = ''; document.getElementById('f-contact').value = '';
-      document.getElementById('f-skills').value = ''; document.getElementById('f-need').value = '';
-      document.getElementById('skills-preview').innerHTML = ''; document.getElementById('need-preview').innerHTML = '';
-    } catch (error) {
-      console.error("Error adding document: ", error);
-      alert("Database error!");
-    }
-  });
+    if (!name || !skillsRaw || !need || !pin) {
+      errorEl.textContent = "Name, skills, need, and PIN are required.";
+      errorEl.style.display = 'block'; successEl.style.display = 'none'; return;
+    }
+    errorEl.style.display = 'none';
+    const skills = skillsRaw.split(',').map(s => s.trim()).filter(Boolean);
 
-  // 7. REMOVE PROFILE LOGIC
-  window.removeProfile = async function(docId, correctPin) {
-    const enteredPin = prompt("Enter PIN to remove this profile:");
-    if (enteredPin === null) return; 
-    
-    // Check against user PIN or universal PIN 8435
-    if (enteredPin === correctPin || enteredPin === "8435") {
-      if (confirm("Are you sure you want to permanently delete this profile?")) {
-        try {
-          await db.collection("students").doc(docId).delete();
-          people = people.filter(p => p.id !== docId);
-          updateStats(); updateBranchFilter(); renderDirectory();
-          alert("Profile successfully removed.");
-        } catch (error) {
-          console.error("Error removing document: ", error);
-          alert("An error occurred while trying to remove the profile.");
-        }
-      }
-    } else {
-      alert("Incorrect PIN. Profile cannot be removed.");
-    }
-  };
+    const saveToDatabase = async (avatarData) => {
+      try {
+        const docData = { name, branch, year, contact, skills, need, pin, timestamp: new Date() };
+        if (avatarData) docData.avatar = avatarData;
 
-  // 8. INITIALIZE PAGE
-  window.addEventListener('scroll', () => {
-    const nav = document.getElementById('navbar');
-    if (window.scrollY > 50) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
-  });
+        const docRef = await db.collection("students").add(docData);
+        
+        const newPerson = { id: docRef.id, name, branch: branch || 'Undeclared', year: year || 'N/A', contact: contact || 'Contact via directory', skills, need, pin };
+        if (avatarData) newPerson.avatar = avatarData;
+        people.push(newPerson);
+        
+        successEl.style.display = 'block';
+        updateStats(); updateBranchFilter(); renderDirectory();
+        
+        document.getElementById('f-name').value = ''; document.getElementById('f-branch').value = '';
+        document.getElementById('f-year').value = ''; document.getElementById('f-contact').value = '';
+        document.getElementById('f-skills').value = ''; document.getElementById('f-need').value = '';
+        document.getElementById('f-photo').value = '';
+        document.getElementById('photo-preview').style.display = 'none';
+        document.getElementById('skills-preview').innerHTML = ''; document.getElementById('need-preview').innerHTML = '';
+      } catch (error) {
+        console.error("Error adding document: ", error);
+        alert("Database error! Please check your Firestore rules.");
+      }
+    };
 
-  updateStats();
-  updateBranchFilter();
-  renderDirectory();
-  loadDirectoryData();
+    if (photoFile) {
+      const reader = new FileReader();
+      reader.onload = (e) => saveToDatabase(e.target.result);
+      reader.readAsDataURL(photoFile);
+    } else {
+      saveToDatabase(null);
+    }
+  });
+
+  // 7. REMOVE PROFILE LOGIC
+  window.removeProfile = async function(docId, correctPin) {
+    const enteredPin = prompt("Enter PIN to remove this profile:");
+    if (enteredPin === null) return; 
+    
+    if (enteredPin === correctPin || enteredPin === "8435") {
+      if (confirm("Are you sure you want to permanently delete this profile?")) {
+        try {
+          if (!docId.startsWith("original-")) {
+            await db.collection("students").doc(docId).delete();
+          }
+          people = people.filter(p => p.id !== docId);
+          updateStats(); updateBranchFilter(); renderDirectory();
+          alert("Profile successfully removed.");
+        } catch (error) {
+          console.error("Error removing document: ", error);
+          alert("An error occurred while trying to remove the profile.");
+        }
+      }
+    } else {
+      alert("Incorrect PIN. Profile cannot be removed.");
+    }
+  };
+
+  // 8. INITIALIZE PAGE
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    if (window.scrollY > 50) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+  });
+
+  updateStats();
+  updateBranchFilter();
+  renderDirectory();
+  loadDirectoryData();
+</script>
 </script>
 
 </body>
