@@ -285,6 +285,10 @@
         <input id="f-need" placeholder="e.g. React developer" oninput="previewChips('f-need','need-preview')" />
         <div class="chip-preview" id="need-preview"></div>
       </div>
+      <div class="field">
+        <label for="f-pin">Secret PIN <span class="opt">(To remove profile later)</span></label>
+        <input id="f-pin" type="password" placeholder="e.g. 1234" />
+      </div>
       <div class="field full">
         <label for="f-photo">Profile photo <span class="opt">(optional — shown in the directory)</span></label>
         <input id="f-photo" type="file" accept="image/*" onchange="previewPhoto()" />
@@ -534,23 +538,53 @@
     document.getElementById('need-preview').innerHTML = '';
   }
 
-  function validateAndAdd() {
-    const name = document.getElementById('f-name').value.trim();
-    const branch = document.getElementById('f-branch').value.trim();
-    const year = document.getElementById('f-year').value;
-    const contact = document.getElementById('f-contact').value.trim();
-    const skillsRaw = document.getElementById('f-skills').value.trim();
-    const need = document.getElementById('f-need').value.trim();
-    const photoFile = document.getElementById('f-photo').files[0];
-    const errorEl = document.getElementById('f-error');
-    const successEl = document.getElementById('f-success');
+  async function validateAndAdd() {
+  const name = document.getElementById('f-name').value.trim();
+  const branch = document.getElementById('f-branch').value.trim();
+  const year = document.getElementById('f-year').value;
+  const contact = document.getElementById('f-contact').value.trim();
+  const skillsRaw = document.getElementById('f-skills').value.trim();
+  const need = document.getElementById('f-need').value.trim();
+  const pin = document.getElementById('f-pin').value.trim(); // Get the PIN
+  const errorEl = document.getElementById('f-error');
+  const successEl = document.getElementById('f-success');
 
-    if (!name || !skillsRaw || !need) {
-      errorEl.style.display = 'block';
-      successEl.style.display = 'none';
-      return;
-    }
+  // Require PIN to submit
+  if (!name || !skillsRaw || !need || !pin) {
+    errorEl.textContent = "Please fill in your name, skills, what you need, and a PIN.";
+    errorEl.style.display = 'block'; 
+    successEl.style.display = 'none'; 
+    return;
+  }
+  errorEl.style.display = 'none';
+  const skills = skillsRaw.split(',').map(s => s.trim()).filter(Boolean);
 
+  try {
+    // Save to Firestore (assuming 'db' is your Firestore database variable)
+    const docRef = await db.collection("students").add({ 
+      name, branch, year, contact, skills, need, pin, timestamp: new Date() 
+    });
+    
+    // Add to local array with the new Firestore ID and PIN
+    people.push({ 
+      id: docRef.id, name, branch: branch || 'Undeclared', year: year || 'N/A', 
+      contact: contact || 'Contact via directory', skills, need, pin 
+    });
+    
+    successEl.style.display = 'block';
+    updateStats(); updateBranchFilter(); renderDirectory();
+    
+    // Clear inputs
+    document.getElementById('f-name').value = ''; document.getElementById('f-branch').value = '';
+    document.getElementById('f-year').value = ''; document.getElementById('f-contact').value = '';
+    document.getElementById('f-skills').value = ''; document.getElementById('f-need').value = '';
+    document.getElementById('f-pin').value = '';
+    document.getElementById('skills-preview').innerHTML = ''; document.getElementById('need-preview').innerHTML = '';
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    alert("Database error!");
+  }
+}
     errorEl.style.display = 'none';
     const skills = skillsRaw.split(',').map(s => s.trim()).filter(Boolean);
 
@@ -650,6 +684,38 @@
       });
     }
   })();
+
+  window.removeProfile = async function(docId, correctPin) {
+  // 1. Prompt for PIN
+  const enteredPin = prompt("Enter PIN to remove this profile:");
+  if (enteredPin === null) return; // Stop if they hit "Cancel"
+  
+  // 2. Check if PIN matches the user's PIN OR your universal admin PIN
+  if (enteredPin === correctPin || enteredPin === "8435") {
+    
+    if (confirm("Are you sure you want to permanently delete this profile?")) {
+      try {
+        // 3. Delete from Firebase
+        await db.collection("students").doc(docId).delete();
+        
+        // 4. Remove from your local website array
+        people = people.filter(p => p.id !== docId);
+        
+        // 5. Instantly refresh the UI without altering filters
+        updateStats();
+        updateBranchFilter();
+        renderDirectory();
+        
+        alert("Profile successfully removed.");
+      } catch (error) {
+        console.error("Error removing document: ", error);
+        alert("An error occurred while trying to remove the profile.");
+      }
+    }
+  } else {
+    alert("Incorrect PIN. Profile cannot be removed.");
+  }
+};
 </script>
 
 </body>
