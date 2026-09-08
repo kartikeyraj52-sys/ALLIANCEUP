@@ -194,6 +194,15 @@
     .person-skills { justify-content: center; }
     .person-bottom { flex-direction: column; gap: 16px; justify-content: center; }
   }
+
+  @keyframes numberBump {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); color: var(--brass); }
+    100% { transform: scale(1); }
+  }
+  .stat-bump {
+    animation: numberBump 0.4s ease-out;
+  }
 </style>
 </head>
 <body>
@@ -423,13 +432,32 @@ const firebaseConfig = {
     });
   };
 
-  function updateStats() {
-    const skillSet = new Set(); const branchSet = new Set();
-    people.forEach(p => { p.skills.forEach(s => skillSet.add(s.toLowerCase())); if (p.branch) branchSet.add(p.branch); });
-    document.getElementById('stat-people').textContent = people.length;
-    document.getElementById('stat-skills').textContent = skillSet.size;
-    document.getElementById('stat-branches').textContent = branchSet.size;
-  }
+ function updateStats() {
+    const skillSet = new Set(); 
+    const branchSet = new Set();
+    
+    // Count total unique skills and branches
+    people.forEach(p => { 
+      if (p.skills) p.skills.forEach(s => skillSet.add(s.trim().toLowerCase())); 
+      if (p.branch) branchSet.add(p.branch.trim().toLowerCase()); 
+    });
+    
+    const peopleEl = document.getElementById('stat-people');
+    const skillsEl = document.getElementById('stat-skills');
+    const branchesEl = document.getElementById('stat-branches');
+
+    // Update the numbers
+    peopleEl.textContent = people.length;
+    skillsEl.textContent = skillSet.size;
+    branchesEl.textContent = branchSet.size;
+
+    // Trigger the visual "bump" animation so the user sees the increase
+    [peopleEl, skillsEl, branchesEl].forEach(el => {
+      el.classList.remove('stat-bump');
+      void el.offsetWidth; // This forces the browser to restart the animation
+      el.classList.add('stat-bump');
+    });
+  }
 
   window.updateBranchFilter = function() {
     const select = document.getElementById('filter-branch');
