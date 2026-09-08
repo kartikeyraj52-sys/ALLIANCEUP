@@ -649,6 +649,199 @@
       });
     }
   })();
+  <script>
+  // 1. Initialize Firebase (Replace with your actual Firebase config)
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
+
+  // 2. Set your secure PIN for removals
+  const REMOVAL_PIN = "8435"; 
+
+  // 3. UI Interaction Functions (from your HTML)
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    if (window.scrollY > 50) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  });
+
+  function previewChips(inputId, previewId) {
+    const input = document.getElementById(inputId).value;
+    const previewContainer = document.getElementById(previewId);
+    previewContainer.innerHTML = '';
+    
+    if (input.trim() === '') return;
+    
+    const items = input.split(',').map(item => item.trim()).filter(item => item !== '');
+    items.forEach(item => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = item;
+      previewContainer.appendChild(chip);
+    });
+  }
+
+  function previewPhoto() {
+    const file = document.getElementById('f-photo').files[0];
+    const previewWrap = document.getElementById('photo-preview');
+    const previewImg = document.getElementById('photo-preview-img');
+    
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImg.src = e.target.result;
+        previewWrap.style.display = 'flex';
+      }
+      reader.readAsDataURL(file);
+    } else {
+      previewWrap.style.display = 'none';
+    }
+  }
+
+  // 4. Submit to Firebase
+  document.getElementById('submit-btn').addEventListener('click', async () => {
+    const name = document.getElementById('f-name').value;
+    const branch = document.getElementById('f-branch').value;
+    const year = document.getElementById('f-year').value;
+    const contact = document.getElementById('f-contact').value;
+    const skills = document.getElementById('f-skills').value;
+    const need = document.getElementById('f-need').value;
+    
+    const errorMsg = document.getElementById('f-error');
+    const successMsg = document.getElementById('f-success');
+
+    if (!name || !skills || !need) {
+      errorMsg.style.display = 'block';
+      successMsg.style.display = 'none';
+      return;
+    }
+
+    errorMsg.style.display = 'none';
+    
+    try {
+      await db.collection("alliance_directory").add({
+        name: name,
+        branch: branch,
+        year: year,
+        contact: contact,
+        skills: skills.split(',').map(s => s.trim()).filter(s => s !== ''),
+        need: need,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      successMsg.style.display = 'block';
+      renderDirectory(); // Refresh list automatically
+      
+      // Clear form
+      document.querySelectorAll('input').forEach(input => input.value = '');
+      document.getElementById('f-year').value = '';
+      document.querySelectorAll('.chip-preview').forEach(div => div.innerHTML = '');
+      document.getElementById('photo-preview').style.display = 'none';
+      
+      setTimeout(() => { successMsg.style.display = 'none'; }, 4000);
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      errorMsg.textContent = "Error saving to database. Check connection.";
+      errorMsg.style.display = 'block';
+    }
+  });
+
+  // 5. Render Directory from Firebase
+  async function renderDirectory() {
+    const personList = document.getElementById('person-list');
+    const countDisplay = document.getElementById('directory-count');
+    const searchInput = document.getElementById('search-input').value.toLowerCase();
+    const branchFilter = document.getElementById('filter-branch').value;
+    const yearFilter = document.getElementById('filter-year').value;
+
+    personList.innerHTML = '<p>Loading directory...</p>';
+
+    try {
+      const snapshot = await db.collection("alliance_directory").orderBy("timestamp", "desc").get();
+      personList.innerHTML = '';
+      let matchCount = 0;
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const skillsString = data.skills ? data.skills.join(' ').toLowerCase() : '';
+        
+        // Filtering logic
+        const matchesSearch = skillsString.includes(searchInput) || data.name.toLowerCase().includes(searchInput);
+        const matchesBranch = branchFilter === '' || data.branch === branchFilter;
+        const matchesYear = yearFilter === '' || data.year === yearFilter;
+
+        if (matchesSearch && matchesBranch && matchesYear) {
+          matchCount++;
+          
+          const skillsHtml = data.skills.map(skill => `<span class="chip">${skill}</span>`).join('');
+          
+          personList.innerHTML += `
+            <div class="person-row">
+              <div class="avatar">
+                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' fill='%23eef1ec'/></svg>" alt="Default Avatar">
+              </div>
+              <div class="person-main">
+                <div class="person-top">
+                  <div class="person-name">${data.name}</div>
+                  <div class="person-meta">${data.branch} • ${data.year}</div>
+                </div>
+                <div class="person-skills">
+                  ${skillsHtml}
+                </div>
+                <div class="person-need">Looking for: <b>${data.need}</b></div>
+                <div class="person-bottom">
+                  <a href="mailto:${data.contact}" class="contact-link">Contact →</a>
+                  <button class="remove-link" onclick="requirePinToRemove('${doc.id}')">Remove</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      });
+
+      countDisplay.textContent = `Showing ${matchCount} students`;
+      if (matchCount === 0) personList.innerHTML = '<p>No students found matching your criteria.</p>';
+
+    } catch (error) {
+      console.error("Error fetching directory: ", error);
+      personList.innerHTML = '<p>Error loading directory. Please try again.</p>';
+    }
+  }
+
+  // 6. PIN-Protected Removal Logic
+  function requirePinToRemove(docId) {
+    const userPin = prompt("Please enter the admin PIN to remove this listing:");
+    
+    if (userPin === null) {
+      return; // Action cancelled by user
+    }
+    
+    if (userPin === REMOVAL_PIN) {
+      db.collection("alliance_directory").doc(docId).delete().then(() => {
+        alert("Listing successfully removed.");
+        renderDirectory(); // Refresh the list to remove the deleted row
+      }).catch((error) => {
+        console.error("Error removing document: ", error);
+        alert("An error occurred while trying to remove the listing.");
+      });
+    } else {
+      alert("Incorrect PIN. Removal denied.");
+    }
+  }
+
+  // Initial render load
+  renderDirectory();
+</script>
 </script>
 
 </body>
