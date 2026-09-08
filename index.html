@@ -650,30 +650,209 @@
       });
     }
   })();
-// Set your secure PIN for removals
-  const REMOVAL_PIN = "8435"; 
 
-  // PIN-Protected Removal Logic for Local Array
+</script>
+<script>
+  // 1. The hardcoded profiles array (Add your 5 profiles here)
+  let people = [
+    {
+      id: "seed-1",
+      name: "Aarav Mehta",
+      branch: "B.C.A",
+      year: "3rd year",
+      skills: ["React", "Node.js", "Firebase"],
+      need: "UI/UX designer",
+      contact: "aarav.m@avantika.edu",
+      avatar: ""
+    },
+    {
+      id: "seed-2",
+      name: "Pushpanjali Rathore",
+      branch: "B.Des",
+      year: "2nd year",
+      skills: ["UI design", "Figma", "Branding"],
+      need: "React developer",
+      contact: "pushpanjali@avantika.edu",
+      avatar: ""
+    }
+    // Add your other profiles below using the exact same format
+  ];
+
+  // 2. Set your secure PIN for removals
+  const REMOVAL_PIN = "1234";
+
+  // 3. UI Navbar Scroll Effect
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    if (window.scrollY > 50) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  });
+
+  // 4. Render Directory (Made crash-proof)
+  function renderDirectory() {
+    const personList = document.getElementById('person-list');
+    const countDisplay = document.getElementById('directory-count');
+    const searchInput = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '';
+    const branchFilter = document.getElementById('filter-branch') ? document.getElementById('filter-branch').value : '';
+    const yearFilter = document.getElementById('filter-year') ? document.getElementById('filter-year').value : '';
+
+    if (!personList) return; 
+    
+    personList.innerHTML = ''; 
+    let matchCount = 0;
+
+    people.forEach((data) => {
+      // Safety checks to prevent crashes if a profile is missing data
+      const safeSkills = Array.isArray(data.skills) ? data.skills : [];
+      const skillsString = safeSkills.join(' ').toLowerCase();
+      const safeName = data.name ? data.name.toLowerCase() : '';
+      const safeBranch = data.branch || '';
+      
+      const matchesSearch = skillsString.includes(searchInput) || safeName.includes(searchInput);
+      const matchesBranch = branchFilter === '' || safeBranch.toLowerCase().includes(branchFilter.toLowerCase());
+      const matchesYear = yearFilter === '' || data.year === yearFilter;
+
+      if (matchesSearch && matchesBranch && matchesYear) {
+        matchCount++;
+        
+        const skillsHtml = safeSkills.map(skill => `<span class="chip">${skill}</span>`).join('');
+        const avatarSrc = data.avatar ? data.avatar : "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' fill='%23eef1ec'/></svg>";
+        
+        personList.innerHTML += `
+          <div class="person-row">
+            <div class="avatar">
+              <img src="${avatarSrc}" alt="${data.name}">
+            </div>
+            <div class="person-main">
+              <div class="person-top">
+                <div class="person-name">${data.name}</div>
+                <div class="person-meta">${data.branch} • ${data.year}</div>
+              </div>
+              <div class="person-skills">
+                ${skillsHtml}
+              </div>
+              <div class="person-need">Looking for: <b>${data.need}</b></div>
+              <div class="person-bottom">
+                <a href="mailto:${data.contact}" class="contact-link">Contact →</a>
+                <button class="remove-link" onclick="requirePinToRemove('${data.id}')">Remove</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    if (countDisplay) {
+        countDisplay.textContent = `Showing ${matchCount} students`;
+    }
+    if (matchCount === 0) {
+      personList.innerHTML = '<p>No students found matching your criteria.</p>';
+    }
+  }
+
+  // 5. PIN-Protected Removal Logic
   function requirePinToRemove(personId) {
     const userPin = prompt("Please enter the admin PIN to remove this listing:");
-    
-    if (userPin === null) {
-      return; // Action cancelled by user
-    }
+    if (userPin === null) return; 
     
     if (userPin === REMOVAL_PIN) {
-      // Find and remove the person from the array
       const index = people.findIndex(p => p.id === personId);
       if (index > -1) {
         people.splice(index, 1); 
         alert("Listing successfully removed.");
-        renderDirectory(); // Refresh the list to hide the deleted profile
+        renderDirectory(); 
       }
     } else {
       alert("Incorrect PIN. Removal denied.");
     }
   }
-</script>
 
+  // 6. Form Submit Logic
+  const submitBtn = document.getElementById('submit-btn');
+  if(submitBtn) {
+      submitBtn.addEventListener('click', () => {
+        const name = document.getElementById('f-name').value;
+        const branch = document.getElementById('f-branch').value;
+        const year = document.getElementById('f-year').value;
+        const contact = document.getElementById('f-contact').value;
+        const skills = document.getElementById('f-skills').value;
+        const need = document.getElementById('f-need').value;
+        
+        const errorMsg = document.getElementById('f-error');
+        const successMsg = document.getElementById('f-success');
+
+        if (!name || !skills || !need) {
+          errorMsg.style.display = 'block';
+          successMsg.style.display = 'none';
+          return;
+        }
+
+        errorMsg.style.display = 'none';
+        
+        const newPerson = {
+          id: "user-" + Date.now(),
+          name: name,
+          branch: branch,
+          year: year,
+          contact: contact,
+          skills: skills.split(',').map(s => s.trim()).filter(s => s !== ''),
+          need: need,
+          avatar: document.getElementById('photo-preview-img') ? document.getElementById('photo-preview-img').src : ""
+        };
+
+        people.unshift(newPerson);
+        successMsg.style.display = 'block';
+        renderDirectory(); 
+        
+        // Clear form inputs
+        document.querySelectorAll('input').forEach(input => input.value = '');
+        document.getElementById('f-year').value = '';
+        document.querySelectorAll('.chip-preview').forEach(div => div.innerHTML = '');
+        const photoPreview = document.getElementById('photo-preview');
+        if(photoPreview) photoPreview.style.display = 'none';
+        
+        setTimeout(() => { successMsg.style.display = 'none'; }, 4000);
+      });
+  }
+
+  // 7. Visual Form Effects
+  function previewChips(inputId, previewId) {
+    const input = document.getElementById(inputId).value;
+    const previewContainer = document.getElementById(previewId);
+    if(!previewContainer) return;
+    previewContainer.innerHTML = '';
+    if (input.trim() === '') return;
+    
+    const items = input.split(',').map(item => item.trim()).filter(item => item !== '');
+    items.forEach(item => {
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = item;
+      previewContainer.appendChild(chip);
+    });
+  }
+
+  function previewPhoto() {
+    const file = document.getElementById('f-photo').files[0];
+    const previewWrap = document.getElementById('photo-preview');
+    const previewImg = document.getElementById('photo-preview-img');
+    
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        if(previewImg) previewImg.src = e.target.result;
+        if(previewWrap) previewWrap.style.display = 'flex';
+      }
+      reader.readAsDataURL(file);
+    } else {
+      if(previewWrap) previewWrap.style.display = 'none';
+    }
+  }
+
+  // 8. Run rendering logic on page load
+  window.onload = () => {
+      renderDirectory();
+  };
+</script>
 </body>
 </html>
