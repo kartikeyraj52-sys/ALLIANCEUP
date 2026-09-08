@@ -170,12 +170,29 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  @media (max-width: 768px) {
+ @media (max-width: 768px) {
+    /* 1. Stack the navigation bar */
+    nav { flex-direction: column; gap: 12px; padding: 16px; }
+    .nav-links { flex-wrap: wrap; justify-content: center; }
+
+    /* 2. Scale down hero text and buttons */
     .hero-text h1 { font-size: 32px; }
     .hero-ctas { flex-direction: column; gap: 16px; }
     .btn { width: 100%; min-width: auto; }
+
+    /* 3. STOP the SVG diagram from breaking the screen width */
+    .diagram-wrap svg { max-width: 100%; height: auto; }
+
+    /* 4. Stack the stats and forms vertically */
+    .stats { grid-template-columns: 1fr; gap: 32px; }
     .form-grid { grid-template-columns: 1fr; }
     .founder-card { flex-direction: column; text-align: center; }
+
+    /* 5. Center and stack the directory profiles for mobile screens */
+    .person-row { flex-direction: column; align-items: center; text-align: center; padding: 20px 16px; }
+    .person-top { justify-content: center; flex-direction: column; align-items: center; gap: 4px; }
+    .person-skills { justify-content: center; }
+    .person-bottom { flex-direction: column; gap: 16px; justify-content: center; }
   }
 </style>
 </head>
