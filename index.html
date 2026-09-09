@@ -335,10 +335,17 @@
         <input id="f-pin" type="password" placeholder="e.g. 1234" />
       </div>
       <div class="field full">
-        <label for="f-photo">Profile photo <span class="opt">(optional — shown in the directory)</span></label>
-        <input id="f-photo" type="file" accept="image/*" onchange="previewPhoto()" />
-        <div id="photo-preview" style="display:none; align-items:center; gap:10px; margin-top:4px;">
-          <img id="photo-preview-img" style="width:44px; height:44px; border-radius:50%; object-fit:cover;" alt="" />
+        <label for="f-avatar-select">Profile Avatar <span class="opt">(Choose a character or leave blank for initials)</span></label>
+        <select id="f-avatar-select" onchange="previewSelectedAvatar()">
+          <option value="">Auto-generate from Name (Initials)</option>
+          <option value="images/aarav.jpg">Avatar 1 (Aarav)</option>
+          <option value="images/simran.jpg">Avatar 2 (Simran)</option>
+          <option value="images/rohan.jpg">Avatar 3 (Rohan)</option>
+          <option value="images/ishita.jpg">Avatar 4 (Ishita)</option>
+          <option value="images/pushpanjali.jpg">Avatar 5 (Pushpanjali)</option>
+        </select>
+        <div id="photo-preview" style="display:none; align-items:center; gap:10px; margin-top:8px;">
+          <img id="photo-preview-img" style="width:44px; height:44px; border-radius:50%; object-fit:cover; background:var(--paper);" alt="" />
           <span style="font-size:12px; color:var(--ink-soft);">Looks good</span>
         </div>
       </div>
